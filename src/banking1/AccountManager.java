@@ -299,7 +299,7 @@ public class AccountManager {
 //	계좌정보 저장
 	public void saveAccountInfo() {
 		try {
-			ObjectOutputStream out =new ObjectOutputStream(new FileOutputStream("src/banking1/account.obj"));
+			ObjectOutputStream out =new ObjectOutputStream(new FileOutputStream("src/banking1/AccountInfo.obj"));
 			for(Account f : account) {
 				out.writeObject(f);
 			}
@@ -312,7 +312,7 @@ public class AccountManager {
 //	계좌정보 가져오기
 	public void readAccountInfo() {
 		try {
-			ObjectInputStream in = new ObjectInputStream(new FileInputStream("src/banking1/account.obj"));
+			ObjectInputStream in = new ObjectInputStream(new FileInputStream("src/banking1/AccountInfo.obj"));
 			while(true) {
 				Account ac = (Account) in.readObject();
 				account.add(ac);
