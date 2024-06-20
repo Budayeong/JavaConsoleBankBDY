@@ -41,6 +41,8 @@ abstract public class Account implements Serializable {
 		this.balance = balance;
 	}
 	
+//	아래 두개의 메서드를 오버라이딩하면 Set에 인스턴스를 추가할때 자동으로 아래 메서드를 호출해 중복된 인스턴스인지 확인
+	
 //	계좌번호를 사용해 해시코드 생성
 	@Override
 	public int hashCode() {
