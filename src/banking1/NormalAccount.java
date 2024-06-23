@@ -2,23 +2,20 @@ package banking1;
 
 public class NormalAccount extends Account {
 //	이자비율
-	private int interest;
+	private int rate;
 
-	public NormalAccount(String num, String name, int balance, int interest) {
+	public NormalAccount(String num, String name, int balance, int rate) {
 		super(num, name, balance);
-		this.interest = interest;
-	}
-
-	public int getInterest() {
-		return interest;
-	}
-
-	public void setInterest(int interest) {
-		this.interest = interest;
+		this.rate = rate;
 	}
 	
-	
+	public int getRate() {
+		return rate;
+	}
 
+	public void setRate(int rate) {
+		this.rate = rate;
+	}
 
 	
 	

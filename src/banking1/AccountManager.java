@@ -10,14 +10,10 @@ import java.util.InputMismatchException;
 import java.util.Iterator;
 import java.util.Scanner;
 
-
-//컨트롤 클래스로 프로그램의 전반적인 기능을 구현
+//핸들러 클래스
 public class AccountManager {
-//	계좌정보는 최대 50개만 저장가능
 	HashSet<Account> account = new HashSet<Account>();
-	
 	private AutoSaver autoSaver;
-	int count = 0;
 	
 //	사용자 메뉴출력
 	public static void showMenu() {
@@ -61,15 +57,14 @@ public class AccountManager {
 		System.out.print("잔고: ");
 		int balance = sc.nextInt();
 		System.out.print("기본이자%(정수형태로입력): ");
-		int interest = sc.nextInt();
+		int rate = sc.nextInt();
 //		버퍼에 남아있는 내용정리
 		sc.nextLine();
 		
 		
 //		1. 보통계좌 선택
 		if(accountType==1) {
-//			입력받은 내용으로 보통계좌 인스턴스 생성
-			inputAccount = new NormalAccount(num, name, balance, interest);
+			inputAccount = new NormalAccount(num, name, balance, rate);
 		}
 //		2. 신용신뢰계좌 선택
 		else if (accountType==2) {
@@ -77,13 +72,11 @@ public class AccountManager {
 			System.out.print("신용등급(A,B,C등급): ");
 			String credit = sc.nextLine();
 			
-//			입력받은 내용으로 신용신뢰계좌 인스턴스 생성
-			inputAccount = new HighCreditAccount(num, name, balance, interest, credit);
+			inputAccount = new HighCreditAccount(num, name, balance, rate, credit);
 		}
 //		3. 특판계좌 선택
 		else if (accountType==3) {
-//			입력받은 내용으로 신용신뢰계좌 인스턴스 생성
-			inputAccount = new SpecialAccount(num, name, balance, interest);
+			inputAccount = new SpecialAccount(num, name, balance, rate);
 			System.out.println("특판계좌 생성");
 		}
 		
@@ -131,17 +124,17 @@ public class AccountManager {
 		System.out.print("계좌번호: ");
 		String inputNum = sc.nextLine();
 		System.out.print("입금액: ");
-		int inputBalance=0;
+		int deposit=0;
 		
 		try {
-			inputBalance= sc.nextInt();
+			deposit= sc.nextInt();
 //			*** 음수는 입금 불가 -> 반려
-			if(inputBalance<0) {
+			if(deposit<0) {
 				System.out.println("\n*** 입금은 양수만 가능합니다(음수불가)");
 				return;
 			}
 //			*** 입금은 500원단위로만 가능 -> 500원 단위입금이 아니면 반려
-			if(!(inputBalance%500==0)) {
+			if(!(deposit%500==0)) {
 				System.out.println("\n *** 입금은 500원 단위로만 가능합니다");
 				return;
 			}
@@ -165,19 +158,19 @@ public class AccountManager {
 //					입금횟수 +1
 					special.setDmCount(special.getDmCount()+1);
 //					기본이자
-					double interestRate = special.getInterest()/100.0;
+					double sRate = special.getRate()/100.0;
 //					현재 계좌의 잔고
 					int todayBalance = special.getBalance();
 					
 //					현재 입금횟수가 짝수인지 판단
 					if(special.getDmCount()%2==0) {
 //						짝수이면: 500원 축하금 지급
-						special.setBalance((int)(todayBalance + (todayBalance*interestRate) + inputBalance + 500));
+						special.setBalance((int)(todayBalance + (todayBalance*sRate) + deposit + 500));
 						System.out.println("짝수번째 입금으로 500원 축하금이 지급되었습니다");
 					}
 					else {
 //						특판계좌: 잔고 + (잔고 * 기본이자) + 입금액
-						special.setBalance((int)(todayBalance + (todayBalance*interestRate) + inputBalance));
+						special.setBalance((int)(todayBalance + (todayBalance*sRate) + deposit));
 					}
 					System.out.println("현재 계좌 잔고: " + special.getBalance() + "원");
 					System.out.println("현재 입금 횟수: " + special.getDmCount() + "회");
@@ -187,11 +180,11 @@ public class AccountManager {
 				else if(thisAccont instanceof NormalAccount) {
 					NormalAccount normal = (NormalAccount)thisAccont;
 //					기본이자
-					double interestRate =  normal.getInterest()/100.0;
+					double iRate =  normal.getRate()/100.0;
 //					현재 계좌의 잔고
 					int todayBalance = normal.getBalance();
 //					보통계좌: 잔고 + (잔고 * 기본이자) + 입금액
-					thisAccont.setBalance((int)(todayBalance + (todayBalance*interestRate) + inputBalance));
+					thisAccont.setBalance((int)(todayBalance + (todayBalance*iRate) + deposit));
 					System.out.println("\n입금이 완료되었습니다");
 					return;
 				}
@@ -199,29 +192,29 @@ public class AccountManager {
 				else if (thisAccont instanceof HighCreditAccount) {
 					HighCreditAccount highCredit = (HighCreditAccount) thisAccont;
 //					기본이자
-					double interestRate =  highCredit.getInterest()/100.0;
+					double rate =  highCredit.getRate()/100.0;
 //					현재 계좌의 잔고
 					int todayBalance = highCredit.getBalance();
 //					추가이자 변수
-					double creditInterest=0.0;
+					double cRate=0.0;
 //					추가이자 설정
 //					해당 계좌의 등급을 확인해서 A,B,C 등급에 따라 차등 설정
 					switch (highCredit.getCredit()) {
 					case "A": {
-						creditInterest = 0.07;
+						cRate = 0.07;
 						break;
 						}
 					case "B" :{
-						creditInterest = 0.04;
+						cRate = 0.04;
 						break;
 						}
 					case "C" :{
-						creditInterest = 0.02;
+						cRate = 0.02;
 						break;
 						}
 					}
 //					신용계좌 : 잔고 + (잔고 * 기본이자) + (잔고 * 추가이자) + 입금액
-					highCredit.setBalance((int)(todayBalance + (todayBalance*interestRate) + (todayBalance*creditInterest) + inputBalance));
+					highCredit.setBalance((int)(todayBalance + (todayBalance*rate) + (todayBalance*cRate) + deposit));
 					System.out.println("\n입금이 완료되었습니다");
 					
 					return;
@@ -242,16 +235,16 @@ public class AccountManager {
 		System.out.print("계좌번호: ");
 		String inputNum = sc.nextLine();
 		System.out.print("출금액: ");
-		int inputBalance= sc.nextInt();
+		int outMoney = sc.nextInt();
 		sc.nextLine();
 		
 //		*** 음수는 출금 불가 -> 반려
-		if(inputBalance<0) {
+		if(outMoney<0) {
 			System.out.println("\n*** 음수는 출금 불가능합니다");
 			return;
 		}
 //		*** 출금은 1000원 단위로 가능 -> 1000원 단위가 아니면 반려
-		if(!(inputBalance%1000==0)) {
+		if(!(outMoney%1000==0)) {
 			System.out.println("\n*** 출금은 1000원 단위로만 가능합니다");
 			return;
 		}
@@ -263,7 +256,7 @@ public class AccountManager {
 //			if: 저장된 계좌정보가 존재하면
 			if(inputNum.equals(thisAccont.getNum())) {
 //				출금 금액이 잔고보다 많을 때
-				if(thisAccont.getBalance()<inputBalance) {
+				if(thisAccont.getBalance()<outMoney) {
 					System.out.println("*** 잔고가 부족합니다. 금액전체를 출금할까요?");
 					System.out.println("YES: 금액전체 출금처리");
 					System.out.println("NO: 출금요청취소");
@@ -287,8 +280,8 @@ public class AccountManager {
 				}
 //				출금금액보다 잔액이 클때(정상출금)
 				else {
-					thisAccont.setBalance(thisAccont.getBalance()-inputBalance);
-					System.out.println("\n"+inputBalance+"원 출금이 완료되었습니다");
+					thisAccont.setBalance(thisAccont.getBalance()-outMoney);
+					System.out.println("\n"+outMoney+"원 출금이 완료되었습니다");
 					return;
 				}
 			}
@@ -313,7 +306,7 @@ public class AccountManager {
 				System.out.println("계좌번호> " + special.getNum());
 				System.out.println("고객이름> " + special.getName());
 				System.out.println("잔고> " + special.getBalance() + "원");
-				System.out.println("기본이자> " + special.getInterest() +"%");
+				System.out.println("기본이자> " + special.getRate() +"%");
 				System.out.println("입금회차> " + special.getDmCount() +"회");
 				System.out.println("------------------"); 
 			}
@@ -324,7 +317,7 @@ public class AccountManager {
 				System.out.println("계좌번호> " + normal.getNum());
 				System.out.println("고객이름> " + normal.getName());
 				System.out.println("잔고> " + normal.getBalance() + "원");
-				System.out.println("기본이자> " + normal.getInterest() +"%");
+				System.out.println("기본이자> " + normal.getRate() +"%");
 				System.out.println("------------------"); 
 			}
 //			3.신용계좌 - 등급까지 출력
@@ -334,7 +327,7 @@ public class AccountManager {
 				System.out.println("계좌번호> " + highCredit.getNum());
 				System.out.println("고객이름> " + highCredit.getName());
 				System.out.println("잔고> " + highCredit.getBalance() + "원");
-				System.out.println("기본이자> " + highCredit.getInterest() +"%");
+				System.out.println("기본이자> " + highCredit.getRate() +"%");
 				System.out.println("신용등급> " + highCredit.getCredit() + "등급");
 				System.out.println("------------------"); 
 			}
